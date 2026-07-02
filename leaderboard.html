@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Leaderboard · IPL Top Trumps</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="css/style.css">
+  <link rel="stylesheet" href="css/animations.css">
+  <link rel="stylesheet" href="css/responsive.css">
+</head>
+<body class="stadium-bg page-wrap">
+
+<div id="toast-container"></div>
+
+<div class="page-header">
+  <a href="index.html" class="btn btn-secondary btn-icon" aria-label="Back">←</a>
+  <h1 class="page-title">🏆 Leaderboard</h1>
+  <button id="btn-clear" class="btn btn-danger" style="margin-left:auto;font-size:0.8rem;">Clear All</button>
+</div>
+
+<div class="page-content">
+  <div class="lobby-card">
+    <table class="leaderboard-table">
+      <thead>
+        <tr>
+          <th>#</th><th>Player</th><th>Wins</th><th>Losses</th><th>Win %</th>
+        </tr>
+      </thead>
+      <tbody id="lb-body">
+        <tr><td colspan="5" class="empty-state">No games played yet!</td></tr>
+      </tbody>
+    </table>
+  </div>
+  <p style="margin-top:14px;font-size:0.76rem;color:var(--text-muted);text-align:center;">Stats stored locally in your browser.</p>
+</div>
+
+<script type="module">
+  import { applySettings, showToast } from './js/shared.js';
+  import { storageGet, storageRemove } from './js/utils.js';
+  applySettings();
+
+  function render() {
+    const body = document.getElementById('lb-body');
+    const entries = (storageGet('ipl_leaderboard') || []).sort((a,b) => b.wins - a.wins);
+    if (!entries.length) {
+      body.innerHTML = '<tr><td colspan="5" class="empty-state">No games played yet!</td></tr>';
+      return;
+    }
+    body.innerHTML = entries.map((e,i) => `
+      <tr class="${i<3?'top-'+(i+1):''}">
+        <td>${i===0?'🥇':i===1?'🥈':i===2?'🥉':i+1}</td>
+        <td>${e.name}</td>
+        <td>${e.wins}</td>
+        <td>${e.losses}</td>
+        <td>${e.winRate}%</td>
+      </tr>`).join('');
+  }
+
+  render();
+
+  document.getElementById('btn-clear').addEventListener('click', () => {
+    if (confirm('Clear all leaderboard entries?')) {
+      storageRemove('ipl_leaderboard');
+      render();
+      showToast('Leaderboard cleared.', 'success');
+    }
+  });
+</script>
+</body>
+</html>

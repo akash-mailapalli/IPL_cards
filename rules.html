@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Rules · IPL Top Trumps</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="css/style.css">
+  <link rel="stylesheet" href="css/animations.css">
+  <link rel="stylesheet" href="css/responsive.css">
+</head>
+<body class="stadium-bg page-wrap">
+
+<div class="page-header">
+  <a href="index.html" class="btn btn-secondary btn-icon" aria-label="Back">←</a>
+  <h1 class="page-title">📖 How to Play</h1>
+</div>
+
+<div class="page-content">
+  <div class="rules-content">
+
+    <div class="rules-step">
+      <div class="rules-step-number">1</div>
+      <div>
+        <div class="rules-step-title">The Deck is Dealt</div>
+        <div class="rules-step-desc">All 146 IPL 2021 player cards are shuffled and split evenly between you and your opponent. You can only see your own top card.</div>
+      </div>
+    </div>
+
+    <div class="rules-step">
+      <div class="rules-step-number">2</div>
+      <div>
+        <div class="rules-step-title">Choose Your Stat</div>
+        <div class="rules-step-desc">Click a stat on your card to challenge your opponent. You have 20 seconds — the timer auto-picks your best stat if it expires.</div>
+      </div>
+    </div>
+
+    <div class="rules-step">
+      <div class="rules-step-number">3</div>
+      <div>
+        <div class="rules-step-title">Comparison Rules</div>
+        <div class="rules-step-desc">
+          <strong>Higher wins:</strong> Matches, Runs, Highest Score, Average, Strike Rate, 100s, 50s, 4s, 6s, Wickets.<br><br>
+          <strong>Lower wins (▼):</strong> Economy Rate &amp; Bowling Average — fewer runs given = better.<br><br>
+          If a bowler stat shows <em>N/A</em> it means that player doesn't bowl — you can't select it.
+        </div>
+      </div>
+    </div>
+
+    <div class="rules-step">
+      <div class="rules-step-number">4</div>
+      <div>
+        <div class="rules-step-title">Card Transfer</div>
+        <div class="rules-step-desc">The winner takes both cards. On a draw, both go to a communal pot won by the next round's victor. The winner of each round chooses the next stat.</div>
+      </div>
+    </div>
+
+    <div class="rules-step">
+      <div class="rules-step-number">5</div>
+      <div>
+        <div class="rules-step-title">Win the Match</div>
+        <div class="rules-step-desc">First player to hold all cards wins. Results are saved to the Leaderboard. In multiplayer, both players see results live via Firebase.</div>
+      </div>
+    </div>
+
+    <div style="margin-top:28px;text-align:center;">
+      <a href="setup.html" class="btn btn-primary" style="margin-right:10px;">🏏 Play vs Bot</a>
+      <a href="multiplayer.html" class="btn btn-secondary">🌐 Play Online</a>
+    </div>
+
+  </div>
+</div>
+
+<script type="module">
+  import { applySettings } from './js/shared.js';
+  applySettings();
+</script>
+</body>
+</html>

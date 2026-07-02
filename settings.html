@@ -1,0 +1,100 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Settings · IPL Top Trumps</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="css/style.css">
+  <link rel="stylesheet" href="css/animations.css">
+  <link rel="stylesheet" href="css/responsive.css">
+</head>
+<body class="stadium-bg page-wrap">
+
+<div id="toast-container"></div>
+
+<div class="page-header">
+  <a href="index.html" class="btn btn-secondary btn-icon" aria-label="Back">←</a>
+  <h1 class="page-title">⚙️ Settings</h1>
+</div>
+
+<div class="page-content" style="max-width:520px;margin:0 auto;">
+  <div class="lobby-card">
+
+    <div class="settings-row">
+      <div>
+        <div class="settings-label">🌙 Dark Mode</div>
+        <div class="settings-hint">Stadium night theme</div>
+      </div>
+      <label class="toggle-switch">
+        <input type="checkbox" id="toggle-darkMode">
+        <span class="toggle-slider"></span>
+      </label>
+    </div>
+
+    <div class="settings-row">
+      <div>
+        <div class="settings-label">✨ Animations</div>
+        <div class="settings-hint">Card flips, transitions, effects</div>
+      </div>
+      <label class="toggle-switch">
+        <input type="checkbox" id="toggle-animations">
+        <span class="toggle-slider"></span>
+      </label>
+    </div>
+
+    <div class="settings-row">
+      <div>
+        <div class="settings-label">🔊 Sound Effects</div>
+        <div class="settings-hint">Card flips, wins, alerts</div>
+      </div>
+      <label class="toggle-switch">
+        <input type="checkbox" id="toggle-sound">
+        <span class="toggle-slider"></span>
+      </label>
+    </div>
+
+  </div>
+
+  <div style="margin-top:24px;">
+    <h3 style="font-size:0.72rem;color:var(--text-muted);text-transform:uppercase;letter-spacing:0.1em;margin-bottom:12px;">Danger Zone</h3>
+    <button id="btn-reset" class="btn btn-danger btn-full">🗑️ Reset All Data</button>
+    <p style="margin-top:8px;font-size:0.76rem;color:var(--text-muted);text-align:center;">Clears leaderboard and all settings. Cannot be undone.</p>
+  </div>
+</div>
+
+<script type="module">
+  import { applySettings, showToast } from './js/shared.js';
+  import { storageGet, storageSet, storageRemove } from './js/utils.js';
+
+  const defaults = { darkMode: true, animations: true, sound: true };
+  let settings = { ...defaults, ...(storageGet('ipl_settings') || {}) };
+
+  // Sync toggles
+  ['darkMode','animations','sound'].forEach(key => {
+    const t = document.getElementById(`toggle-${key}`);
+    if (t) {
+      t.checked = settings[key] !== false;
+      t.addEventListener('change', () => {
+        settings[key] = t.checked;
+        storageSet('ipl_settings', settings);
+        applySettings();
+        showToast(`${key} ${t.checked ? 'enabled' : 'disabled'}.`, 'info', 2000);
+      });
+    }
+  });
+
+  applySettings();
+
+  document.getElementById('btn-reset').addEventListener('click', () => {
+    if (confirm('Reset all leaderboard and settings data? Cannot be undone.')) {
+      storageRemove('ipl_leaderboard');
+      storageRemove('ipl_settings');
+      showToast('All data reset.', 'success');
+      setTimeout(() => location.reload(), 1200);
+    }
+  });
+</script>
+</body>
+</html>

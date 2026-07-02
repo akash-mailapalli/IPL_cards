@@ -1,0 +1,258 @@
+/* responsive.css — IPL Top Trumps — Mobile-first breakpoints */
+
+/* ═══════════════════════════════════════════════════════════════════
+   GAME PAGE — the most critical layout to get right on mobile.
+   Goal: both cards visible on screen at the same time, no scroll.
+   Strategy: use CSS container units + clamp() to scale everything
+   fluidly from 320px phones up to 1440px desktops.
+═══════════════════════════════════════════════════════════════════ */
+
+/* ── Mobile portrait: ≤ 640px ─────────────────────────────────── */
+@media (max-width: 640px) {
+
+  /* HUD: tighten */
+  .game-hud {
+    padding: 6px 10px;
+    gap: 6px;
+    flex-wrap: nowrap;
+  }
+
+  .hud-section { gap: 8px; }
+  .hud-stat-value { font-size: 1rem; }
+  .hud-stat-label { font-size: 0.55rem; }
+  .hud-divider    { height: 20px; }
+  .turn-timer     { font-size: 1.1rem; }
+
+  .turn-indicator {
+    font-size: 0.68rem;
+    padding: 4px 8px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    max-width: 140px;
+  }
+
+  /* Arena: side-by-side on mobile too — but MUCH smaller cards */
+  .game-layout .game-arena {
+    grid-template-columns: 1fr 1fr;
+    gap: 6px;
+    padding: 6px 6px;
+    overflow-y: auto;
+    align-items: start;
+  }
+
+  .arena-section { gap: 4px; }
+
+  .arena-label {
+    font-size: 0.58rem;
+    letter-spacing: 0.06em;
+  }
+
+  /* Card: scale down dramatically for mobile */
+  .player-card {
+    max-width: 100%;
+    border-radius: 10px;
+  }
+
+  /* Image header: much shorter */
+  .card-header {
+    height: 80px;
+    padding: 6px;
+  }
+
+  .card-team-badge {
+    font-size: 0.55rem;
+    padding: 2px 6px;
+  }
+
+  /* Card body */
+  .card-body {
+    padding: 6px 8px 8px;
+  }
+
+  .card-name {
+    font-size: 0.75rem;
+    margin-bottom: 3px;
+  }
+
+  .card-meta {
+    gap: 3px;
+    margin-bottom: 6px;
+  }
+
+  .card-role,
+  .card-nationality {
+    font-size: 0.55rem;
+    padding: 1px 5px;
+  }
+
+  /* Stats grid: 2 columns, tiny */
+  .card-stats {
+    gap: 3px;
+  }
+
+  .stat-row {
+    padding: 5px 6px;
+    min-height: 36px;
+    gap: 0px;
+    border-radius: 4px;
+  }
+
+  .stat-label {
+    font-size: 0.48rem;
+    letter-spacing: 0.04em;
+  }
+
+  .stat-value {
+    font-size: 0.72rem;
+  }
+
+  /* Result badge */
+  .card-result-badge {
+    font-size: 0.5rem;
+    padding: 2px 6px;
+    top: 6px;
+    right: 6px;
+  }
+
+  /* Card back */
+  .card-back-logo { font-size: 1.6rem; }
+  .card-back-text { font-size: 0.55rem; letter-spacing: 0.1em; }
+
+  /* Footer quit button */
+  .game-layout footer {
+    padding: 5px 12px;
+  }
+
+  .game-layout footer .btn {
+    padding: 6px 16px;
+    font-size: 0.78rem;
+  }
+
+  /* Fullscreen button */
+  #btn-fullscreen-game {
+    padding: 5px 10px;
+    font-size: 0.75rem;
+  }
+}
+
+/* ── Very small phones: ≤ 380px ───────────────────────────────── */
+@media (max-width: 380px) {
+
+  .hud-stat-value { font-size: 0.85rem; }
+  .turn-indicator { max-width: 110px; font-size: 0.62rem; }
+
+  .card-header { height: 65px; }
+  .card-name   { font-size: 0.68rem; }
+
+  .stat-row    { padding: 4px 5px; min-height: 32px; }
+  .stat-label  { font-size: 0.44rem; }
+  .stat-value  { font-size: 0.65rem; }
+}
+
+/* ── Tablet: 641px – 1023px ───────────────────────────────────── */
+@media (min-width: 641px) and (max-width: 1023px) {
+
+  .game-layout .game-arena {
+    gap: 16px;
+    padding: 12px 16px;
+  }
+
+  .player-card  { max-width: 260px; }
+  .card-header  { height: 130px; }
+  .card-name    { font-size: 1rem; }
+  .stat-label   { font-size: 0.56rem; }
+  .stat-value   { font-size: 0.85rem; }
+  .stat-row     { padding: 7px 8px; min-height: 40px; }
+}
+
+/* ── Desktop: ≥ 1024px ────────────────────────────────────────── */
+@media (min-width: 1024px) {
+  .game-layout .game-arena { padding: 20px 32px; gap: 32px; }
+  .player-card { max-width: 320px; }
+}
+
+/* ═══════════════════════════════════════════════════════════════════
+   OTHER PAGES
+═══════════════════════════════════════════════════════════════════ */
+
+/* Home */
+@media (max-width: 480px) {
+  #screen-home { padding: 24px 16px; }
+  .home-nav { padding: 24px 20px; border-radius: 16px; }
+  .home-nav .btn { padding: 12px 20px; font-size: 0.9rem; }
+}
+
+/* Win screen */
+@media (max-width: 480px) {
+  .win-actions { flex-direction: column; width: 100%; max-width: 280px; }
+  .win-actions .btn { width: 100%; }
+}
+
+/* Lobby */
+@media (max-width: 520px) {
+  .lobby-card { padding: 16px; border-radius: 14px; }
+  .room-id-display { font-size: 1.3rem; letter-spacing: 0.12em; }
+}
+
+/* Leaderboard */
+@media (max-width: 520px) {
+  .leaderboard-table { font-size: 0.78rem; }
+  .leaderboard-table th,
+  .leaderboard-table td { padding: 7px 6px; }
+}
+
+/* Page headers/content */
+@media (max-width: 640px) {
+  .page-header  { padding: 14px 16px; }
+  .page-content { padding: 14px 16px; }
+  .page-title   { font-size: 1.3rem; }
+}
+
+/* Setup card */
+@media (max-width: 480px) {
+  .setup-card { padding: 24px 20px; border-radius: 16px; }
+  .setup-card h2 { font-size: 1.5rem; }
+}
+
+/* HUD stack when very narrow */
+@media (max-width: 400px) {
+  .game-hud { gap: 4px; padding: 5px 8px; }
+  .hud-section { gap: 6px; }
+}
+
+/* Multiplayer menu grid */
+@media (max-width: 520px) {
+  .mp-grid { grid-template-columns: 1fr; }
+}
+
+/* Toast */
+@media (max-width: 480px) {
+  #toast-container { left: 8px; right: 8px; bottom: 8px; }
+  .toast { max-width: 100%; font-size: 0.8rem; padding: 10px 12px; }
+}
+
+/* Rules */
+@media (max-width: 520px) {
+  .rules-step { gap: 10px; }
+  .rules-step-number { font-size: 1.6rem; min-width: 32px; }
+}
+
+/* Fullscreen mode */
+@media (display-mode: fullscreen) {
+  .game-hud { padding-top: env(safe-area-inset-top, 8px); }
+}
+
+/* Safe area (notch / home bar) */
+@supports (padding: env(safe-area-inset-bottom)) {
+  #toast-container { bottom: calc(8px + env(safe-area-inset-bottom)); }
+  .game-hud { padding-top: calc(6px + env(safe-area-inset-top)); }
+}
+
+/* Card back: scale min-height on mobile */
+@media (max-width: 640px) {
+  .card-back { min-height: 120px; }
+}
+@media (max-width: 380px) {
+  .card-back { min-height: 100px; }
+}

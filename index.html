@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+  <title>IPL Top Trumps</title>
+  <meta name="theme-color" content="#080c14">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="css/style.css">
+  <link rel="stylesheet" href="css/animations.css">
+  <link rel="stylesheet" href="css/responsive.css">
+</head>
+<body class="stadium-bg">
+
+<div id="toast-container"></div>
+
+<div style="position:fixed;top:16px;right:16px;z-index:10;display:flex;gap:8px;">
+  <button id="btn-fullscreen" class="btn btn-secondary btn-icon" title="Fullscreen">⛶</button>
+</div>
+
+<div style="display:flex;flex-direction:column;align-items:center;justify-content:center;min-height:100vh;padding:40px 20px;gap:0;">
+
+  <div class="home-hero">
+    <div class="home-logo"><span class="logo-icon">🏏</span> IPL TOP TRUMPS</div>
+    <p class="home-subtitle">Season 2021 · Card Battle</p>
+    <p class="home-tagline">Build your squad. Choose your stat. Dominate the pitch.</p>
+  </div>
+
+  <nav class="home-nav">
+    <a href="setup.html"        class="btn btn-primary  btn-full">🤖 Play vs Bot</a>
+    <a href="multiplayer.html"  class="btn btn-secondary btn-full">🌐 Multiplayer</a>
+    <a href="rules.html"        class="btn btn-secondary btn-full">📖 Rules</a>
+    <a href="leaderboard.html"  class="btn btn-secondary btn-full">🏆 Leaderboard</a>
+    <a href="settings.html"     class="btn btn-secondary btn-full">⚙️ Settings</a>
+  </nav>
+
+  <p style="margin-top:24px;font-size:0.72rem;color:var(--text-muted);">v2.0 · IPL Top Trumps · 2021 Season Data</p>
+</div>
+
+<script type="module">
+  import { applySettings } from './js/shared.js';
+  applySettings();
+  document.getElementById('btn-fullscreen').addEventListener('click', () => {
+    if (!document.fullscreenElement) document.documentElement.requestFullscreen().catch(()=>{});
+    else document.exitFullscreen().catch(()=>{});
+  });
+</script>
+</body>
+</html>

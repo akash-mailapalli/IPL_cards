@@ -1,0 +1,162 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Multiplayer · IPL Top Trumps</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="css/style.css">
+  <link rel="stylesheet" href="css/animations.css">
+  <link rel="stylesheet" href="css/responsive.css">
+</head>
+<body class="stadium-bg page-wrap">
+
+<div id="toast-container"></div>
+
+<div class="page-header">
+  <a href="index.html" class="btn btn-secondary btn-icon" aria-label="Back">←</a>
+  <h1 class="page-title">🌐 Multiplayer</h1>
+</div>
+
+<div class="page-content">
+
+  <!-- Player name -->
+  <div style="max-width:520px;margin:0 auto 20px;">
+    <label class="form-label" for="mp-player-name">Your Display Name</label>
+    <input type="text" id="mp-player-name" class="form-input" placeholder="Enter your name" maxlength="20" autocomplete="off">
+  </div>
+
+  <!-- Card count -->
+  <div style="max-width:520px;margin:0 auto 28px;">
+    <label class="form-label" for="card-count">Number of Cards per Player</label>
+    <select id="card-count" class="form-select">
+      <option value="10">10 cards — Quick (5 min)</option>
+      <option value="20">20 cards — Short (10 min)</option>
+      <option value="30">30 cards — Medium (15 min)</option>
+      <option value="50">50 cards — Long (25 min)</option>
+      <option value="73" selected>73 cards — Full deck (40 min)</option>
+    </select>
+    <p style="font-size:0.76rem;color:var(--text-muted);margin-top:6px;">
+      Both players get the same number of randomly selected cards.
+    </p>
+  </div>
+
+  <div style="display:grid;grid-template-columns:1fr 1fr;gap:20px;max-width:600px;margin:0 auto;" class="mp-grid">
+
+    <!-- Create Room -->
+    <div class="lobby-card" style="text-align:center;">
+      <div style="font-size:2.5rem;margin-bottom:12px;">🏗️</div>
+      <h3 style="font-family:'Bebas Neue',sans-serif;font-size:1.4rem;letter-spacing:0.04em;color:var(--accent-gold);margin-bottom:8px;">Create Room</h3>
+      <p style="font-size:0.82rem;color:var(--text-secondary);margin-bottom:20px;">Host a new game and share your room code with a friend.</p>
+      <button id="btn-create" class="btn btn-primary btn-full">Create Room</button>
+    </div>
+
+    <!-- Join Room -->
+    <div class="lobby-card" style="text-align:center;">
+      <div style="font-size:2.5rem;margin-bottom:12px;">🔗</div>
+      <h3 style="font-family:'Bebas Neue',sans-serif;font-size:1.4rem;letter-spacing:0.04em;color:var(--accent-gold);margin-bottom:8px;">Join Room</h3>
+      <p style="font-size:0.82rem;color:var(--text-secondary);margin-bottom:12px;">Enter your opponent's 6-character room code.</p>
+      <input type="text" id="room-code-input" class="form-input"
+        placeholder="e.g. A3K9MX" maxlength="6"
+        style="text-align:center;font-family:'JetBrains Mono',monospace;font-size:1.2rem;letter-spacing:0.15em;text-transform:uppercase;margin-bottom:10px;">
+      <button id="btn-join" class="btn btn-primary btn-full">Join Room</button>
+    </div>
+  </div>
+
+  <div style="margin-top:28px;max-width:600px;margin-left:auto;margin-right:auto;padding:14px 16px;background:rgba(0,177,64,0.06);border:1px solid rgba(0,177,64,0.2);border-radius:12px;font-size:0.82rem;color:var(--text-secondary);">
+    🔥 <strong style="color:var(--accent-green);">Firebase connected.</strong>
+    Rooms are live — your opponent will see your moves in real time.
+    <br><span style="color:var(--text-muted);font-size:0.76rem;">Note: Card count is set by the host. Guest joins whatever the host configured.</span>
+  </div>
+</div>
+
+<script type="module">
+  import { applySettings, showToast } from './js/shared.js';
+  import { loadPlayers } from './js/csv-loader.js';
+  import { buildDeck } from './js/deck.js';
+  import { generateRoomId, shuffleArray } from './js/utils.js';
+  import { createRoom, joinRoom } from './js/firebase.js';
+  applySettings();
+
+  function getPlayerName() {
+    const v = document.getElementById('mp-player-name').value.trim();
+    if (!v) { showToast('Please enter your name first.', 'warning'); return null; }
+    return v;
+  }
+
+  function getPlayerId() {
+    let id = sessionStorage.getItem('ipl_player_id');
+    if (!id) {
+      id = 'P-' + Math.random().toString(36).slice(2,10).toUpperCase();
+      sessionStorage.setItem('ipl_player_id', id);
+    }
+    return id;
+  }
+
+  document.getElementById('btn-create').addEventListener('click', async () => {
+    const name = getPlayerName();
+    if (!name) return;
+    const btn = document.getElementById('btn-create');
+    btn.disabled = true; btn.textContent = 'Creating…';
+
+    try {
+      const cardCount = parseInt(document.getElementById('card-count').value);
+      const allPlayers = await loadPlayers();
+
+      // Shuffle all players, take cardCount*2, split evenly
+      const shuffled = shuffleArray([...allPlayers]);
+      const selected = shuffled.slice(0, cardCount * 2);
+      const hostDeck  = selected.slice(0, cardCount);
+      const guestDeck = selected.slice(cardCount);
+
+      const roomId   = generateRoomId();
+      const playerId = getPlayerId();
+
+      await createRoom(roomId, playerId, name, hostDeck, guestDeck, cardCount);
+
+      sessionStorage.setItem('ipl_lobby_state', JSON.stringify({
+        roomId, playerId, playerName: name, role: 'host'
+      }));
+      window.location.href = 'lobby.html';
+    } catch (err) {
+      showToast('Failed to create room. Check Firebase connection.', 'error');
+      console.error(err);
+      btn.disabled = false; btn.textContent = 'Create Room';
+    }
+  });
+
+  document.getElementById('btn-join').addEventListener('click', async () => {
+    const name = getPlayerName();
+    if (!name) return;
+    const code = document.getElementById('room-code-input').value.trim().toUpperCase();
+    if (code.length < 4) { showToast('Please enter a valid room code.', 'warning'); return; }
+
+    const btn = document.getElementById('btn-join');
+    btn.disabled = true; btn.textContent = 'Joining…';
+
+    try {
+      const playerId = getPlayerId();
+      const ok = await joinRoom(code, playerId, name);
+      if (!ok) {
+        showToast('Room not found or already full.', 'error');
+        btn.disabled = false; btn.textContent = 'Join Room';
+        return;
+      }
+      sessionStorage.setItem('ipl_lobby_state', JSON.stringify({
+        roomId: code, playerId, playerName: name, role: 'guest'
+      }));
+      window.location.href = 'lobby.html';
+    } catch (err) {
+      showToast('Failed to join room.', 'error');
+      console.error(err);
+      btn.disabled = false; btn.textContent = 'Join Room';
+    }
+  });
+
+  document.getElementById('room-code-input').addEventListener('input', e => {
+    e.target.value = e.target.value.toUpperCase();
+  });
+</script>
+</body>
+</html>

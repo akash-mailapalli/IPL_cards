@@ -1,0 +1,92 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Result · IPL Top Trumps</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="css/style.css">
+  <link rel="stylesheet" href="css/animations.css">
+  <link rel="stylesheet" href="css/responsive.css">
+</head>
+<body class="win-page stadium-bg">
+
+<div id="confetti-container" aria-hidden="true"></div>
+<div id="toast-container"></div>
+
+<div class="win-card" id="win-card">
+  <div style="font-size:5rem;" id="win-emoji">🏏</div>
+  <h1 id="win-title" style="font-family:'Bebas Neue',sans-serif;font-size:clamp(2.5rem,8vw,4.5rem);letter-spacing:0.04em;margin:12px 0 8px;">—</h1>
+  <p id="win-subtitle" style="font-size:1rem;color:var(--text-secondary);margin-bottom:4px;"></p>
+  <p id="win-rounds"   style="font-size:0.82rem;color:var(--text-muted);margin-bottom:32px;"></p>
+
+  <div style="display:flex;gap:12px;flex-wrap:wrap;justify-content:center;">
+    <button id="btn-rematch" class="btn btn-primary">⚔️ Rematch</button>
+    <a href="index.html" class="btn btn-secondary">🏠 Home</a>
+  </div>
+</div>
+
+<script type="module">
+  import { applySettings } from './js/shared.js';
+  applySettings();
+
+  const raw = sessionStorage.getItem('ipl_win_state');
+  if (!raw) { window.location.href = 'index.html'; }
+  const s = JSON.parse(raw);
+  // Keep state for rematch
+  sessionStorage.setItem('ipl_win_state_keep', raw);
+
+  const isWin = s.winner === 'player';
+  document.getElementById('win-emoji').textContent   = isWin ? '🏆' : '💀';
+  document.getElementById('win-title').textContent   = isWin ? 'You Win!' : 'You Lose!';
+  document.getElementById('win-subtitle').textContent= isWin
+    ? `Superb! You crushed ${s.opponentName}!`
+    : `${s.opponentName} wins this time. Better luck next match!`;
+  document.getElementById('win-rounds').textContent  = `Completed in ${s.rounds} rounds`;
+
+  const card = document.getElementById('win-card');
+  if (isWin) {
+    card.style.borderColor = 'rgba(0,177,64,0.4)';
+    card.style.boxShadow   = '0 0 48px rgba(0,177,64,0.2)';
+    confetti();
+  } else {
+    card.style.borderColor = 'rgba(236,28,36,0.3)';
+    card.style.boxShadow   = '0 0 48px rgba(236,28,36,0.15)';
+  }
+
+  // Rematch — rebuild deck and go back to game
+  document.getElementById('btn-rematch').addEventListener('click', async () => {
+    const { loadPlayers } = await import('./js/csv-loader.js');
+    const { buildDeck, dealCards } = await import('./js/deck.js');
+    const players = await loadPlayers();
+    const deck = buildDeck(players);
+    const { player: playerDeck, opponent: botDeck } = dealCards(deck);
+    sessionStorage.setItem('ipl_game_state', JSON.stringify({
+      mode:         s.mode,
+      playerName:   s.playerName,
+      opponentName: s.opponentName,
+      difficulty:   s.difficulty,
+      playerDeck,
+      opponentDeck: botDeck,
+      pot: [], round: 1, turn: 'player'
+    }));
+    window.location.href = 'game.html';
+  });
+
+  function confetti() {
+    const c = document.getElementById('confetti-container');
+    const cols = ['#f7c948','#ec1c24','#004ba0','#00b140','#9b59b6','#FDB913'];
+    for (let i = 0; i < 90; i++) {
+      const p = document.createElement('div');
+      p.className = 'confetti-piece';
+      p.style.cssText = `left:${Math.random()*100}%;background:${cols[i%6]};`
+        + `animation-duration:${1.5+Math.random()*2}s;animation-delay:${Math.random()*0.8}s;`
+        + `transform:rotate(${Math.random()*360}deg);`;
+      c.appendChild(p);
+    }
+    setTimeout(() => c.innerHTML='', 4500);
+  }
+</script>
+</body>
+</html>

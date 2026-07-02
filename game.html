@@ -1,0 +1,512 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+  <title>Game · IPL Top Trumps</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="css/style.css">
+  <link rel="stylesheet" href="css/animations.css">
+  <link rel="stylesheet" href="css/responsive.css">
+</head>
+<body class="game-page">
+
+<div id="toast-container"></div>
+<div id="confetti-container" aria-hidden="true"></div>
+
+<div class="game-layout">
+
+  <header class="game-hud">
+    <div class="hud-section">
+      <div class="hud-stat">
+        <span class="hud-stat-value" id="hud-player-cards">—</span>
+        <span class="hud-stat-label">Your Cards</span>
+      </div>
+      <div class="hud-divider"></div>
+      <div class="hud-stat">
+        <span class="hud-stat-value" id="hud-round">1</span>
+        <span class="hud-stat-label">Round</span>
+      </div>
+      <div class="hud-divider"></div>
+      <div class="hud-stat">
+        <span class="hud-stat-value" id="hud-pot">0</span>
+        <span class="hud-stat-label">Pot</span>
+      </div>
+    </div>
+
+    <div id="turn-indicator" class="turn-indicator">Loading…</div>
+
+    <div class="hud-section">
+      <div class="hud-stat">
+        <span class="hud-stat-value" id="hud-opponent-cards">—</span>
+        <span class="hud-stat-label" id="hud-opponent-label">Opponent</span>
+      </div>
+      <div class="hud-divider"></div>
+      <span class="turn-timer" id="turn-timer">20</span>
+    </div>
+  </header>
+
+  <main class="game-arena">
+    <section class="arena-section" aria-label="Your card">
+      <div class="arena-label">You — <span id="your-name-label"></span></div>
+      <div id="player-card-container"></div>
+    </section>
+    <section class="arena-section" aria-label="Opponent card">
+      <div class="arena-label" id="opponent-label">Opponent</div>
+      <div id="opponent-card-container"></div>
+    </section>
+  </main>
+
+  <footer style="padding:6px 16px;display:flex;align-items:center;justify-content:center;gap:10px;border-top:1px solid var(--border-subtle);flex-shrink:0;">
+    <button id="btn-quit" class="btn btn-secondary">🏠 Quit</button>
+    <button id="btn-fullscreen-game" class="btn btn-secondary" title="Toggle Fullscreen">⛶ Fullscreen</button>
+  </footer>
+</div>
+
+<script type="module">
+import { applySettings, showToast } from './js/shared.js';
+import { STAT_KEYS, botChooseStat, botThinkDelay, isHigherBetter } from './js/bot.js';
+import { drawCard, compareStat, transferCards, addToPot, checkWinner } from './js/deck.js';
+import { CountdownTimer } from './js/timer.js';
+import { formatNumber, storageGet, storageSet, sleep, getBestStat } from './js/utils.js';
+import { playSound } from './js/audio.js';
+
+applySettings();
+
+/* ════════════════════════════════════════════════════════════════════════
+   LOAD INITIAL STATE
+   ════════════════════════════════════════════════════════════════════════ */
+const raw = sessionStorage.getItem('ipl_game_state');
+if (!raw) { window.location.href = 'index.html'; throw new Error('no state'); }
+const INIT = JSON.parse(raw);
+sessionStorage.removeItem('ipl_game_state');
+
+const IS_MULTIPLAYER = INIT.mode === 'multiplayer';
+
+setText('your-name-label',    INIT.playerName   || 'You');
+setText('opponent-label',     INIT.opponentName || 'Opponent');
+setText('hud-opponent-label', (INIT.opponentName || 'Opponent') + ' Cards');
+
+const timer = new CountdownTimer({
+  duration: 20,
+  onTick: (s) => {
+    const el = document.getElementById('turn-timer');
+    if (el) { el.textContent = s; el.className = `turn-timer ${s <= 5 ? 'timer-urgent' : ''}`; }
+  },
+  onExpire: () => { if (onTimerExpire) onTimerExpire(); }
+});
+let onTimerExpire = null;
+
+document.getElementById('btn-quit').addEventListener('click', async () => {
+  if (!confirm('Quit this game and go home?')) return;
+  if (IS_MULTIPLAYER) {
+    const { stopListening } = await import('./js/firebase.js');
+    stopListening(INIT.roomId);
+  }
+  window.location.href = 'index.html';
+});
+
+/* ════════════════════════════════════════════════════════════════════════
+   BOT MODE — fully local, simple turn loop
+   ════════════════════════════════════════════════════════════════════════ */
+if (!IS_MULTIPLAYER) {
+  runBotGame();
+}
+
+async function runBotGame() {
+  const B = {
+    playerName:   INIT.playerName,
+    opponentName: INIT.opponentName,
+    difficulty:   INIT.difficulty,
+    playerDeck:   INIT.playerDeck,
+    opponentDeck: INIT.opponentDeck,
+    pot:          [],
+    round:        1,
+    turn:         'player' // 'player' | 'opponent'
+  };
+
+  async function playRound() {
+    const pc = drawCard(B.playerDeck);
+    const oc = drawCard(B.opponentDeck);
+    if (!pc || !oc) { finishBotGame(B.playerDeck.length ? 'player' : 'opponent'); return; }
+
+    updateHUD(B.playerDeck.length, B.opponentDeck.length, B.round, B.pot.length);
+
+    const myTurn = B.turn === 'player';
+    await flipCard('player-card-container',   pc, { selectable: myTurn });
+    await flipCard('opponent-card-container', oc, { faceDown: myTurn });
+    setTurnIndicator(myTurn ? '🎯 Your Turn — Choose a stat!' : `⏳ ${B.opponentName} is thinking…`,
+                      myTurn ? 'player' : 'opponent');
+
+    if (myTurn) {
+      onTimerExpire = () => {
+        const p = drawCard(B.playerDeck);
+        if (p) { showToast('Time up! Auto-selecting best stat…', 'warning', 2000); chooseStat(getBestStat(p)); }
+      };
+      bindStatClicks('player-card-container', (stat) => { timer.stop(); chooseStat(stat); });
+      timer.start();
+    } else {
+      await flipCard('opponent-card-container', oc, { faceDown: false });
+      await botThinkDelay(800, 1800);
+      const stat = botChooseStat(oc, B.difficulty);
+      showToast(`${B.opponentName} chose: ${labelOf(stat)}`, 'info', 1800);
+      await sleep(600);
+      await resolve(stat);
+    }
+
+    async function chooseStat(stat) {
+      playSound('cardFlip');
+      await resolve(stat);
+    }
+
+    async function resolve(stat) {
+      const result = compareStat(pc, oc, stat);
+      await showResult('player-card-container', 'opponent-card-container', pc, oc, stat, result, B.opponentName);
+
+      if (result === 'draw') {
+        B.pot = addToPot(B.playerDeck, B.opponentDeck, B.pot);
+      } else if (result === 'player') {
+        B.pot = transferCards(B.playerDeck, B.opponentDeck, B.pot);
+        B.turn = 'player';
+      } else {
+        B.pot = transferCards(B.opponentDeck, B.playerDeck, B.pot);
+        B.turn = 'opponent';
+      }
+      B.round++;
+
+      const winner = checkWinner(B.playerDeck, B.opponentDeck);
+      if (winner) { finishBotGame(winner, B.round - 1); return; }
+      await playRound();
+    }
+  }
+
+  function finishBotGame(winner, rounds) {
+    timer.stop();
+    saveStats(B.playerName, winner === 'player');
+    playSound(winner === 'player' ? 'win' : 'lose');
+    sessionStorage.setItem('ipl_win_state', JSON.stringify({
+      winner, playerName: B.playerName, opponentName: B.opponentName,
+      rounds: rounds ?? B.round - 1, mode: 'bot', difficulty: B.difficulty
+    }));
+    window.location.href = 'win.html';
+  }
+
+  await playRound();
+}
+
+/* ════════════════════════════════════════════════════════════════════════
+   MULTIPLAYER MODE — room object is the single source of truth.
+   Every render reads directly from the latest Firebase snapshot.
+   No local deck mutation. No flags. The room tells us exactly what to show.
+   ════════════════════════════════════════════════════════════════════════ */
+if (IS_MULTIPLAYER) {
+  runMultiplayerGame();
+}
+
+async function runMultiplayerGame() {
+  const { listenForChanges, stopListening, submitStat, updateDeck, setWinner } =
+    await import('./js/firebase.js');
+
+  const ROLE = INIT.role; // 'host' | 'guest'
+  const ROOM_ID = INIT.roomId;
+
+  // Each Firebase callback invocation gets a sequence number. Only the
+  // MOST RECENT invocation is allowed to update the DOM — any older,
+  // still-running invocation (e.g. mid-sleep inside showResult) becomes
+  // stale the moment a newer snapshot arrives, and silently stops acting.
+  // This replaces the old "resolving" boolean which could get stuck true
+  // and block legitimate newer frames from ever rendering (the bug you hit).
+  let callSeq = 0;
+  let resolvedKey = null; // dedup so the SAME chosenStat frame isn't resolved twice
+
+  listenForChanges(ROOM_ID, async (room) => {
+    if (!room) return;
+    const mySeq = ++callSeq; // this invocation's identity
+    const isStale = () => mySeq !== callSeq; // true once a newer snapshot has arrived
+
+    // Game over — go to win screen
+    if (room.status === 'finished') {
+      stopListening(ROOM_ID);
+      const won = room.winner === ROLE;
+      saveStats(INIT.playerName, won);
+      sessionStorage.setItem('ipl_win_state', JSON.stringify({
+        winner: won ? 'player' : 'opponent',
+        playerName: INIT.playerName, opponentName: INIT.opponentName,
+        rounds: (room.round || 1) - 1, mode: 'multiplayer'
+      }));
+      window.location.href = 'win.html';
+      return;
+    }
+
+    const myDeck  = ROLE === 'host' ? room.hostDeck  : room.guestDeck;
+    const oppDeck = ROLE === 'host' ? room.guestDeck : room.hostDeck;
+    updateHUD(myDeck?.length ?? 0, oppDeck?.length ?? 0, room.round ?? 1, room.pot?.length ?? 0);
+
+    // ── A stat has been chosen this round — resolve it (exactly once) ──────
+    if (room.chosenStat && room.statChooser) {
+      const key = room.round + '|' + room.chosenStat + '|' + room.statChooser;
+      if (resolvedKey === key) return; // this exact round+stat already resolved
+      resolvedKey = key;
+
+      timer.stop();
+      onTimerExpire = null;
+
+      const hostCard  = (room.hostDeck  || [])[0];
+      const guestCard = (room.guestDeck || [])[0];
+      if (!hostCard || !guestCard) return;
+
+      // Compare ALWAYS in absolute host-vs-guest terms — no perspective confusion
+      const absResult = compareStat(hostCard, guestCard, room.chosenStat); // 'player'=host won
+      const iWon   = (ROLE === 'host'  && absResult === 'player')
+                  || (ROLE === 'guest' && absResult === 'opponent');
+      const isDraw = absResult === 'draw';
+
+      const myCard  = ROLE === 'host' ? hostCard  : guestCard;
+      const oppCard = ROLE === 'host' ? guestCard : hostCard;
+
+      const chooserName    = room.statChooser === ROLE ? 'You' : INIT.opponentName;
+      const resultForToast = iWon ? 'player' : isDraw ? 'draw' : 'opponent';
+
+      // Show the result animation. If a NEWER snapshot arrives while this
+      // await is pending, `isStale()` becomes true — we still let the
+      // animation finish for the user, but we will not act on this frame
+      // beyond that (the newer invocation already owns the next render).
+      await showResult('player-card-container', 'opponent-card-container',
+                        myCard, oppCard, room.chosenStat, resultForToast, INIT.opponentName, chooserName);
+
+      // Only the HOST writes the next state — single writer avoids races.
+      // Only do this from the invocation that is still current, so we never
+      // double-write if this callback somehow re-entered.
+      if (ROLE === 'host' && !isStale()) {
+        const oldPot    = room.pot || [];
+        const hostRest  = (room.hostDeck  || []).slice(1);
+        const guestRest = (room.guestDeck || []).slice(1);
+        let newHostDeck, newGuestDeck, newPot, nextTurn;
+
+        if (absResult === 'player') {
+          newHostDeck  = [...hostRest, ...oldPot, hostCard, guestCard].filter(Boolean);
+          newGuestDeck = [...guestRest];
+          newPot = []; nextTurn = 'host';
+        } else if (absResult === 'opponent') {
+          newHostDeck  = [...hostRest];
+          newGuestDeck = [...guestRest, ...oldPot, guestCard, hostCard].filter(Boolean);
+          newPot = []; nextTurn = 'guest';
+        } else {
+          newHostDeck  = [...hostRest];
+          newGuestDeck = [...guestRest];
+          newPot = [...oldPot, hostCard, guestCard].filter(Boolean);
+          nextTurn = room.turn;
+        }
+
+        if (newGuestDeck.length === 0) { await setWinner(ROOM_ID, 'host');  return; }
+        if (newHostDeck.length  === 0) { await setWinner(ROOM_ID, 'guest'); return; }
+
+        await updateDeck(ROOM_ID, newHostDeck, newGuestDeck, newPot, (room.round || 1) + 1, nextTurn);
+        // This write clears chosenStat in Firebase → listener fires again
+        // with a NEW snapshot → that NEW invocation renders the next turn
+        // below. We do not try to render it from here.
+      }
+      return;
+    }
+
+    // ── No stat chosen — show the correct turn UI ──────────────────────────
+    // This always reflects whatever the LATEST snapshot says. There is no
+    // flag here that can get "stuck" — every new snapshot re-evaluates and
+    // re-renders from scratch, which is what makes this reliable.
+    const pc = (myDeck  || [])[0];
+    const oc = (oppDeck || [])[0];
+    if (!pc || !oc) return;
+
+    const myTurn = room.turn === ROLE;
+
+    await flipCard('player-card-container',   pc, { selectable: myTurn });
+    if (isStale()) return; // a newer snapshot arrived mid-animation — let it own the render
+    await flipCard('opponent-card-container', oc, { faceDown: true });
+    if (isStale()) return;
+
+    if (myTurn) {
+      setTurnIndicator('🎯 Your Turn — Choose a stat!', 'player');
+      onTimerExpire = () => {
+        showToast('Time up! Auto-selecting best stat…', 'warning', 2000);
+        timer.stop();
+        submitStat(ROOM_ID, getBestStat(pc), ROLE);
+      };
+      bindStatClicks('player-card-container', (stat) => {
+        timer.stop();
+        onTimerExpire = null;
+        playSound('cardFlip');
+        setTurnIndicator('📡 Sent! Waiting for result…', 'player');
+        submitStat(ROOM_ID, stat, ROLE);
+      });
+      timer.start();
+    } else {
+      timer.stop();
+      onTimerExpire = null;
+      setTurnIndicator(`⏳ ${INIT.opponentName} is choosing…`, 'opponent');
+    }
+  });
+}
+
+/* ════════════════════════════════════════════════════════════════════════
+   SHARED RESULT DISPLAY — used by both bot and multiplayer modes
+   ════════════════════════════════════════════════════════════════════════ */
+async function showResult(myContainerId, oppContainerId, myCard, oppCard, statKey, result, opponentName, chooserName) {
+  // result: 'player' = I won, 'opponent' = they won, 'draw'
+  const myClass  = result === 'player' ? 'win' : result === 'draw' ? 'draw' : 'lose';
+  const oppClass = result === 'opponent' ? 'win' : result === 'draw' ? 'draw' : 'lose';
+
+  renderCardEl(myContainerId,  myCard,  { highlightStat: statKey, resultClass: myClass });
+  renderCardEl(oppContainerId, oppCard, { highlightStat: statKey, resultClass: oppClass });
+
+  if (result === 'player')        playSound('win');
+  else if (result === 'opponent') playSound('lose');
+  else                             playSound('draw');
+
+  const lbl  = labelOf(statKey);
+  const hint = !isHigherBetter(statKey) ? ' (lower wins)' : '';
+  const who  = chooserName ? `${chooserName} chose ` : '';
+  const msgs = {
+    player:   `🏆 You win! ${who}${lbl}${hint}: ${myCard[statKey]} vs ${oppCard[statKey]}`,
+    opponent: `💀 ${opponentName} wins! ${who}${lbl}${hint}: ${myCard[statKey]} vs ${oppCard[statKey]}`,
+    draw:     `🤝 Draw! ${lbl}: ${myCard[statKey]} each — Cards go to pot.`
+  };
+  showToast(msgs[result], result === 'player' ? 'success' : result === 'opponent' ? 'error' : 'warning', 3000);
+  await sleep(2400);
+}
+
+/* ════════════════════════════════════════════════════════════════════════
+   STATS / LEADERBOARD
+   ════════════════════════════════════════════════════════════════════════ */
+function saveStats(name, won) {
+  const board = storageGet('ipl_leaderboard') || [];
+  const ex = board.find(e => e.name === name);
+  if (ex) {
+    ex.played++; if (won) ex.wins++; else ex.losses++;
+    ex.winRate = Math.round((ex.wins / ex.played) * 100);
+  } else {
+    board.push({ name, wins: won?1:0, losses: won?0:1, played:1, winRate: won?100:0 });
+  }
+  storageSet('ipl_leaderboard', board);
+}
+
+/* ════════════════════════════════════════════════════════════════════════
+   UI HELPERS
+   ════════════════════════════════════════════════════════════════════════ */
+function updateHUD(myCards, oppCards, round, pot) {
+  setText('hud-player-cards',   myCards);
+  setText('hud-opponent-cards', oppCards);
+  setText('hud-round',          round);
+  setText('hud-pot',            pot);
+}
+
+function setTurnIndicator(msg, turn) {
+  const el = document.getElementById('turn-indicator');
+  if (el) { el.textContent = msg; el.className = `turn-indicator turn-${turn}`; }
+}
+
+async function flipCard(containerId, player, opts = {}) {
+  const c = document.getElementById(containerId);
+  if (!c) return;
+  c.classList.add('flipping');
+  await sleep(260);
+  renderCardEl(containerId, player, opts);
+  c.classList.remove('flipping');
+}
+
+function renderCardEl(containerId, player, opts = {}) {
+  const c = document.getElementById(containerId);
+  if (c) c.innerHTML = buildCardHTML(player, opts);
+}
+
+function buildCardHTML(player, { selectable=false, faceDown=false, highlightStat=null, resultClass=null } = {}) {
+  if (faceDown) return `
+    <div class="player-card card-back">
+      <div class="card-back-pattern">
+        <div class="card-back-logo">🏏</div>
+        <div class="card-back-text">IPL Top Trumps</div>
+      </div>
+    </div>`;
+
+  const stats = STAT_KEYS.map(({ key, label, higherWins }) => {
+    const val = player[key];
+    if (val === undefined || val === null) return '';
+    const isBowl = key === 'economy' || key === 'bowlingAverage';
+    if (isBowl && Number(val) === 0) return `
+      <div class="stat-row stat-na" title="${label} — not applicable">
+        <span class="stat-label">${label}</span>
+        <span class="stat-value">N/A</span>
+      </div>`;
+    const hi  = key === highlightStat ? 'highlighted' : '';
+    const dirIcon = !higherWins ? ' ▼' : '';
+    if (selectable) {
+      return `
+        <button type="button" class="stat-row selectable ${hi}" data-stat="${key}"
+                title="${label}${!higherWins ? ' (lower is better)' : ''}">
+          <span class="stat-label">${label}${dirIcon}</span>
+          <span class="stat-value">${formatNumber(val)}</span>
+        </button>`;
+    }
+    return `
+      <div class="stat-row ${hi}" title="${label}${!higherWins ? ' (lower is better)' : ''}">
+        <span class="stat-label">${label}${dirIcon}</span>
+        <span class="stat-value">${formatNumber(val)}</span>
+      </div>`;
+  }).join('');
+
+  const badge = resultClass ? `<div class="card-result-badge badge-${resultClass}">${resultClass.toUpperCase()}</div>` : '';
+  const roleIcons = { Batsman:'🏏', Bowler:'⚾', 'All Rounder':'⚡', 'Wicket Keeper':'🧤' };
+
+  return `
+    <div class="player-card ${resultClass ? 'card-'+resultClass : ''}">
+      ${badge}
+      <div class="card-header" style="background:linear-gradient(135deg,${player.teamColor}cc,${player.teamColor}33);">
+        <img class="card-image" src="${player.image}" alt="${player.name}"
+             onerror="this.src='assets/images/players/placeholder.svg'">
+        <div class="card-header-info">
+          <div class="card-team-badge" style="background:${player.teamColor}">${player.teamShort}</div>
+        </div>
+      </div>
+      <div class="card-body">
+        <h3 class="card-name">${player.name}</h3>
+        <div class="card-meta">
+          <span class="card-role">${roleIcons[player.role]||'🏏'} ${player.role}</span>
+          <span class="card-nationality">${player.battingHand}-hand</span>
+        </div>
+        <div class="card-stats">${stats}</div>
+      </div>
+    </div>`;
+}
+
+// Single delegated listener handles BOTH click and touch reliably —
+// using a real <button> element for selectable rows fixes mobile taps.
+function bindStatClicks(containerId, onPick) {
+  const c = document.getElementById(containerId);
+  if (!c) return;
+  c.querySelectorAll('.stat-row.selectable').forEach(btn => {
+    btn.addEventListener('click', () => onPick(btn.dataset.stat), { passive: true });
+  });
+}
+
+function labelOf(key) { return STAT_KEYS.find(s => s.key === key)?.label ?? key; }
+function setText(id, val) { const e = document.getElementById(id); if (e) e.textContent = val; }
+
+// ── Fullscreen ────────────────────────────────────────────────────────────
+const btnFs = document.getElementById('btn-fullscreen-game');
+if (btnFs) {
+  btnFs.addEventListener('click', () => {
+    if (!document.fullscreenElement) {
+      document.documentElement.requestFullscreen().catch(() => {});
+      btnFs.textContent = '✕ Exit Full';
+    } else {
+      document.exitFullscreen().catch(() => {});
+      btnFs.textContent = '⛶ Fullscreen';
+    }
+  });
+  document.addEventListener('fullscreenchange', () => {
+    if (!document.fullscreenElement) btnFs.textContent = '⛶ Fullscreen';
+  });
+}
+</script>
+</body>
+</html>

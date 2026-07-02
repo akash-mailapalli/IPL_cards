@@ -1,0 +1,182 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Lobby · IPL Top Trumps</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="css/style.css">
+  <link rel="stylesheet" href="css/animations.css">
+  <link rel="stylesheet" href="css/responsive.css">
+</head>
+<body class="stadium-bg page-wrap">
+
+<div id="toast-container"></div>
+
+<div class="page-header">
+  <button id="btn-leave" class="btn btn-secondary btn-icon" aria-label="Leave room">←</button>
+  <h1 class="page-title">🎮 Room Lobby</h1>
+  <span id="role-label" style="margin-left:auto;font-size:0.8rem;color:var(--accent-gold);font-weight:600;"></span>
+</div>
+
+<div class="page-content" style="max-width:520px;margin:0 auto;">
+
+  <!-- Room ID -->
+  <div style="margin-bottom:24px;">
+    <p style="font-size:0.72rem;color:var(--text-muted);text-transform:uppercase;letter-spacing:0.1em;margin-bottom:8px;">Room Code</p>
+    <div class="room-id-display" id="room-id-display">——————</div>
+    <button id="btn-copy" class="btn btn-secondary btn-full" style="margin-top:10px;">📋 Copy Room Code</button>
+  </div>
+
+  <!-- Players -->
+  <div class="lobby-card" style="margin-bottom:20px;">
+    <h3 style="font-size:0.72rem;color:var(--text-muted);text-transform:uppercase;letter-spacing:0.1em;margin-bottom:16px;">Players</h3>
+
+    <div class="lobby-player-row">
+      <div class="status-dot" id="host-dot"></div>
+      <div>
+        <div style="font-weight:600;" id="host-name">Waiting…</div>
+        <div style="font-size:0.72rem;color:var(--text-muted);">Host 👑</div>
+      </div>
+      <div style="margin-left:auto;font-size:0.72rem;color:var(--text-muted);" id="host-ready-label"></div>
+    </div>
+
+    <div class="lobby-player-row">
+      <div class="status-dot" id="guest-dot"></div>
+      <div>
+        <div style="font-weight:600;" id="guest-name">Waiting for player…</div>
+        <div style="font-size:0.72rem;color:var(--text-muted);">Guest 🎮</div>
+      </div>
+      <div style="margin-left:auto;font-size:0.72rem;color:var(--text-muted);" id="guest-ready-label"></div>
+    </div>
+  </div>
+
+  <!-- Status message -->
+  <div id="status-msg" style="text-align:center;font-size:0.85rem;color:var(--text-secondary);margin-bottom:16px;">
+    Share the room code with your opponent.
+  </div>
+
+  <!-- Actions -->
+  <div style="display:flex;flex-direction:column;gap:10px;">
+    <button id="btn-ready" class="btn btn-primary btn-full" disabled>✅ Ready Up</button>
+    <p style="text-align:center;font-size:0.78rem;color:var(--text-muted);">
+      Both players must click Ready to start the match.
+    </p>
+  </div>
+
+</div>
+
+<script type="module">
+  import { applySettings, showToast } from './js/shared.js';
+  import {
+    listenForChanges, stopListening, setPlayerReady,
+    startGame, deleteRoom, removeGuest
+  } from './js/firebase.js';
+  import { copyToClipboard } from './js/utils.js';
+  applySettings();
+
+  // ─── Load lobby state ──────────────────────────────────────────────────────
+  const raw = sessionStorage.getItem('ipl_lobby_state');
+  if (!raw) { window.location.href = 'multiplayer.html'; }
+  const { roomId, playerId, playerName, role } = JSON.parse(raw);
+
+  document.getElementById('room-id-display').textContent = roomId;
+  document.getElementById('role-label').textContent = role === 'host' ? '👑 Host' : '🎮 Guest';
+
+  let startTriggered  = false; // host: have we called startGame() yet
+  let navigated       = false; // both: have we navigated to game.html yet
+
+  // ─── Firebase listener ─────────────────────────────────────────────────────
+  listenForChanges(roomId, async (room) => {
+    // Update player names
+    setText('host-name',  room.hostName  || 'Waiting…');
+    setText('guest-name', room.guestName || 'Waiting for player…');
+
+    // Update dots
+    setDot('host-dot',  room.hostReady);
+    setDot('guest-dot', room.guestReady);
+    setText('host-ready-label',  room.hostReady  ? '✅ Ready' : '');
+    setText('guest-ready-label', room.guestReady ? '✅ Ready' : '');
+
+    // Enable Ready button once opponent is in the room
+    const btnReady = document.getElementById('btn-ready');
+    if (room.guest && btnReady.disabled && !room[`${role}Ready`]) {
+      btnReady.disabled = false;
+      setText('status-msg', "Opponent joined! Click Ready when you're set.");
+    }
+
+    if (!room.guest) {
+      setText('status-msg', 'Waiting for opponent to join…');
+    }
+
+    // Both ready → only the HOST writes status:'playing' to Firebase (once)
+    if (room.hostReady && room.guestReady && role === 'host'
+        && room.status === 'ready' && !startTriggered) {
+      startTriggered = true;
+      setText('status-msg', '🚀 Both ready! Starting match…');
+      await startGame(roomId);
+      // Do NOT return — the listener will fire again with status:'playing'
+      // and the navigation block below will handle both players
+    }
+
+    // Navigate when Firebase confirms status is 'playing' — runs for ALL players
+    if (room.status === 'playing' && !navigated) {
+      navigated = true;
+      stopListening(roomId);
+
+      sessionStorage.setItem('ipl_game_state', JSON.stringify({
+        mode:         'multiplayer',
+        roomId,
+        playerId,
+        playerName,
+        role,
+        opponentName: role === 'host' ? (room.guestName || 'Guest') : (room.hostName || 'Host'),
+        playerDeck:   role === 'host' ? room.hostDeck  : room.guestDeck,
+        opponentDeck: role === 'host' ? room.guestDeck : room.hostDeck,
+        pot:          [],
+        round:        1,
+        turn:         'host'   // host always picks first
+      }));
+      window.location.href = 'game.html';
+    }
+  });
+
+  // ─── Ready button ──────────────────────────────────────────────────────────
+  document.getElementById('btn-ready').addEventListener('click', async () => {
+    const btn = document.getElementById('btn-ready');
+    btn.disabled = true; btn.textContent = 'Ready ✓';
+    await setPlayerReady(roomId, role);
+    showToast("You're ready! Waiting for opponent…", 'success');
+  });
+
+  // ─── Copy room code ────────────────────────────────────────────────────────
+  document.getElementById('btn-copy').addEventListener('click', async () => {
+    const ok = await copyToClipboard(roomId);
+    showToast(ok ? 'Room code copied!' : 'Copy failed — copy manually.', ok ? 'success' : 'warning');
+  });
+
+  // ─── Leave room ────────────────────────────────────────────────────────────
+  document.getElementById('btn-leave').addEventListener('click', async () => {
+    if (!confirm('Leave this room?')) return;
+    stopListening(roomId);
+    if (role === 'host') await deleteRoom(roomId);
+    else await removeGuest(roomId);
+    sessionStorage.removeItem('ipl_lobby_state');
+    window.location.href = 'multiplayer.html';
+  });
+
+  // Also leave on page close/refresh
+  window.addEventListener('beforeunload', () => {
+    stopListening(roomId);
+  });
+
+  // ─── Helpers ──────────────────────────────────────────────────────────────
+  function setText(id, val) { const e = document.getElementById(id); if (e) e.textContent = val; }
+  function setDot(id, ready) {
+    const e = document.getElementById(id);
+    if (e) e.className = `status-dot ${ready ? 'ready' : ''}`;
+  }
+</script>
+</body>
+</html>
