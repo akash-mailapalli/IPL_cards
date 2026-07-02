@@ -19,7 +19,7 @@
     "wickets": 0,
     "economy": 0.0,
     "bowlingAverage": 0.0,
-    "image": "assets/images/players/placeholder.svg",
+    "image": "https://pbs.twimg.com/media/GJRO4fZXkAEQ-TW.jpg",
     "teamColor": "#FDB913"
   },
   {
@@ -42,7 +42,7 @@
     "wickets": 0,
     "economy": 0.0,
     "bowlingAverage": 0.0,
-    "image": "assets/images/players/placeholder.svg",
+    "image": "https://pbs.twimg.com/media/E0yqskgXEAEbKKB.jpg",
     "teamColor": "#ED1B24"
   },
   {
@@ -65,7 +65,7 @@
     "wickets": 0,
     "economy": 0.0,
     "bowlingAverage": 0.0,
-    "image": "assets/images/players/placeholder.svg",
+    "image": "https://w0.peakpx.com/wallpaper/457/691/HD-wallpaper-sunrisers-hyderabad-cricket-david-warner-indian-premier-league-ipl-orange-army-srh.jpg",
     "teamColor": "#F7A721"
   },
   {
@@ -88,7 +88,7 @@
     "wickets": 0,
     "economy": 0.0,
     "bowlingAverage": 0.0,
-    "image": "assets/images/players/placeholder.svg",
+    "image": "https://w0.peakpx.com/wallpaper/769/1008/HD-wallpaper-sunrisers-hyderabad-cricket-indian-premier-league-ipl-jonny-bairstow-orange-army-srh.jpg",
     "teamColor": "#F7A721"
   },
   {
@@ -111,7 +111,7 @@
     "wickets": 18,
     "economy": 7.9,
     "bowlingAverage": 40.5,
-    "image": "assets/images/players/placeholder.svg",
+    "image": "https://im.rediff.com/cricket/2013/apr/23gayle.JPG",
     "teamColor": "#ED1B24"
   },
   {
@@ -134,7 +134,7 @@
     "wickets": 0,
     "economy": 0.0,
     "bowlingAverage": 0.0,
-    "image": "assets/images/players/placeholder.svg",
+    "image": "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQVgN5y7kHAwgZuclQHLcMjA5jkaNDfY2xuFnfduZreVTkN_Yotx_TkyqM&s=10",
     "teamColor": "#FDB913"
   },
   {
@@ -157,7 +157,7 @@
     "wickets": 0,
     "economy": 0.0,
     "bowlingAverage": 0.0,
-    "image": "assets/images/players/placeholder.svg",
+    "image": "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcT_Xj783afkOgT63YanGxzzzqLjodA0rdeVoWK3GXOhe1N_uhKWcg8RZ4Uu&s=10",
     "teamColor": "#EC1C24"
   },
   {
@@ -180,7 +180,7 @@
     "wickets": 0,
     "economy": 10.33,
     "bowlingAverage": 0.0,
-    "image": "assets/images/players/placeholder.svg",
+    "image": "https://pbs.twimg.com/media/EyriLRqUUAEBJ5u.jpg",
     "teamColor": "#F7A721"
   },
   {
@@ -203,7 +203,7 @@
     "wickets": 4,
     "economy": 8.8,
     "bowlingAverage": 92.0,
-    "image": "assets/images/players/placeholder.svg",
+    "image": "https://static.toiimg.com/thumb/msid-120820030,width-400,resizemode-4/New-Delhi-Royal-Challengers-Bengalurus-Virat-Kohli-plays-a-shot-during-an-Indi-.jpg",
     "teamColor": "#EC1C24"
   },
   {
@@ -226,7 +226,7 @@
     "wickets": 0,
     "economy": 0.0,
     "bowlingAverage": 0.0,
-    "image": "assets/images/players/placeholder.svg",
+    "image": "https://documents.iplt20.com/playerheadshot/ipl/284/271.png",
     "teamColor": "#17479E"
   },
   {
@@ -249,7 +249,7 @@
     "wickets": 0,
     "economy": 0.0,
     "bowlingAverage": 0.0,
-    "image": "assets/images/players/placeholder.svg",
+    "image": "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQ7z0cQ9lbbGgJGkk2rDToUaJVJK0ftPWbk6in_C7iTY6JFzBUcCimTbxJ7&s=10",
     "teamColor": "#17479E"
   },
   {
@@ -272,7 +272,7 @@
     "wickets": 0,
     "economy": 0.0,
     "bowlingAverage": 0.0,
-    "image": "assets/images/players/placeholder.svg",
+    "image": "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQmotzr16iwn9Z6Xyu9ObQ4t6uWosz1PvXEGYD5YJiG4HYh1vNeg6DaeDw7&s=10",
     "teamColor": "#254AA5"
   },
   {
@@ -295,7 +295,7 @@
     "wickets": 4,
     "economy": 8.25,
     "bowlingAverage": 16.5,
-    "image": "assets/images/players/placeholder.svg",
+    "image": "https://akm-img-a-in.tosshub.com/indiatoday/images/story/202011/Shikhar_Dawan_PTI_Picture_1200x768.jpeg?size=690:388",
     "teamColor": "#17479E"
   },
   {
@@ -318,7 +318,7 @@
     "wickets": 0,
     "economy": 0.0,
     "bowlingAverage": 0.0,
-    "image": "assets/images/players/placeholder.svg",
+    "image": "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQc3gbRt2XWqEKkwAhfJ4YRP1xVV9FHVhdqd2X0MKvlyQ&s=10",
     "teamColor": "#004BA0"
   },
   {
@@ -341,7 +341,7 @@
     "wickets": 0,
     "economy": 0.0,
     "bowlingAverage": 0.0,
-    "image": "assets/images/players/placeholder.svg",
+    "image": "https://pbs.twimg.com/media/EzCi9qPUYAEKB9k.jpg",
     "teamColor": "#254AA5"
   },
   {
@@ -364,7 +364,7 @@
     "wickets": 0,
     "economy": 0.0,
     "bowlingAverage": 0.0,
-    "image": "assets/images/players/placeholder.svg",
+    "image": "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQTFgwzA-WojRqMTCBUqtsNzC7gIsj25mK3OhygOOQDiG9vYHuIIRQIm6mK&s=10",
     "teamColor": "#3A225D"
   },
   {
@@ -387,7 +387,7 @@
     "wickets": 25,
     "economy": 7.39,
     "bowlingAverage": 44.72,
-    "image": "assets/images/players/placeholder.svg",
+    "image": "https://static.toiimg.com/thumb/msid-81566423,width-400,resizemode-4/81566423.jpg",
     "teamColor": "#FDB913"
   },
   {
@@ -410,7 +410,7 @@
     "wickets": 0,
     "economy": 16.0,
     "bowlingAverage": 0.0,
-    "image": "assets/images/players/placeholder.svg",
+    "image": "https://cf-img-a-in.tosshub.com/sites/visualstory/wp/2023/06/fafduplessiscsk234-scaled.jpg?size=*:900",
     "teamColor": "#FDB913"
   },
   {
@@ -433,7 +433,7 @@
     "wickets": 0,
     "economy": 0.0,
     "bowlingAverage": 0.0,
-    "image": "assets/images/players/placeholder.svg",
+    "image": "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQKcFzJ_ip1156dkjmT8Lvbksvhv7d9NcrrE6MMsDqpYDjJS7jlK1I0bfg&s=10",
     "teamColor": "#ED1B24"
   },
   {
@@ -456,7 +456,7 @@
     "wickets": 17,
     "economy": 9.8,
     "bowlingAverage": 40.82,
-    "image": "assets/images/players/placeholder.svg",
+    "image": "https://sc0.blr1.digitaloceanspaces.com/inline/879414-ukvopeuwxf-1526615966.jpg",
     "teamColor": "#F7A721"
   },
   {
@@ -479,7 +479,7 @@
     "wickets": 6,
     "economy": 7.0,
     "bowlingAverage": 24.5,
-    "image": "assets/images/players/placeholder.svg",
+    "image": "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcROrQxJjzgEEQWhdvsyC_QDwDnjGiFWO7xgIXpnKlpIjQ&s=10",
     "teamColor": "#FDB913"
   },
   {
@@ -502,7 +502,7 @@
     "wickets": 1,
     "economy": 5.0,
     "bowlingAverage": 5.0,
-    "image": "assets/images/players/placeholder.svg",
+    "image": "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTYiIuYebwEnQMXre8DVROFXYsEmohtrqXAPAmLUF-Q7A9sv0HSDgGevrM&s=10",
     "teamColor": "#17479E"
   },
   {
@@ -525,7 +525,7 @@
     "wickets": 0,
     "economy": 0.0,
     "bowlingAverage": 0.0,
-    "image": "assets/images/players/placeholder.svg",
+    "image": "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQlGbv3h6-sRqWKA5S0aSUB2uaRwyTnJ3fkjgQR2lcdhQ&s=10",
     "teamColor": "#004BA0"
   },
   {
@@ -548,7 +548,7 @@
     "wickets": 0,
     "economy": 0.0,
     "bowlingAverage": 0.0,
-    "image": "assets/images/players/placeholder.svg",
+    "image": "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTMO5_aHnIQjllZhQhsP4frzLo4PF2MXaQg1vnM3dmV4A&s=10",
     "teamColor": "#EC1C24"
   },
   {
@@ -571,7 +571,7 @@
     "wickets": 0,
     "economy": 0.0,
     "bowlingAverage": 0.0,
-    "image": "assets/images/players/placeholder.svg",
+    "image": "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRg4bI8c1rI_q7IBr3FbQKi9e40b73Ku9-nGuxepmtbpA&s=10",
     "teamColor": "#17479E"
   },
   {
@@ -594,7 +594,7 @@
     "wickets": 15,
     "economy": 7.95,
     "bowlingAverage": 29.33,
-    "image": "assets/images/players/placeholder.svg",
+    "image": "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRBu8kFw4f7JDJ9mrdV6-Nl5dc541gMbC6G3Ol3RA5PPQ&s=10",
     "teamColor": "#004BA0"
   },
   {
@@ -617,7 +617,7 @@
     "wickets": 24,
     "economy": 7.13,
     "bowlingAverage": 28.33,
-    "image": "assets/images/players/placeholder.svg",
+    "image": "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcT6xhzt2-gqQtgiVwXkAlsdDLO_gplCjdshY4LJiv66Rg&s=10",
     "teamColor": "#254AA5"
   },
   {
@@ -640,7 +640,7 @@
     "wickets": 0,
     "economy": 8.0,
     "bowlingAverage": 0.0,
-    "image": "assets/images/players/placeholder.svg",
+    "image": "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTzpPhviqKAqlIFeXuv_IGZWRcxcjpLn8B-hg67cvwZkw&s=10",
     "teamColor": "#004BA0"
   },
   {
@@ -663,7 +663,7 @@
     "wickets": 42,
     "economy": 9.07,
     "bowlingAverage": 31.26,
-    "image": "assets/images/players/placeholder.svg",
+    "image": "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRJtrIUJ_f1-96DipaRC_c2E-5jvLwchwYauBDhddPk-g&s=10",
     "teamColor": "#004BA0"
   },
   {
@@ -686,7 +686,7 @@
     "wickets": 60,
     "economy": 8.88,
     "bowlingAverage": 32.67,
-    "image": "assets/images/players/placeholder.svg",
+    "image": "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcS2ESnwj5T0stc1R4XYh7rC57ODigfWuCTA9bS_KKROvA&s=10",
     "teamColor": "#004BA0"
   },
   {
@@ -709,7 +709,7 @@
     "wickets": 61,
     "economy": 8.96,
     "bowlingAverage": 28.08,
-    "image": "assets/images/players/placeholder.svg",
+    "image": "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcScfaOTteh_i1DwpTTlfNNsEBDKQxSH7mVAO8fdRtA0Lw&s=10",
     "teamColor": "#3A225D"
   },
   {
@@ -732,7 +732,7 @@
     "wickets": 6,
     "economy": 8.43,
     "bowlingAverage": 38.17,
-    "image": "assets/images/players/placeholder.svg",
+    "image": "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRy0nt8eOhF06mDJEq-Wg0RJ9mPb6OMG462pQD5T55Hlg&s=10",
     "teamColor": "#F7A721"
   },
   {
@@ -755,7 +755,7 @@
     "wickets": 0,
     "economy": 0.0,
     "bowlingAverage": 0.0,
-    "image": "assets/images/players/placeholder.svg",
+    "image": "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRDtCkZLPHJlA2L4i8uaRE5ugGYwepnlLLxhbNoKZo__w&s=10",
     "teamColor": "#F7A721"
   },
   {
@@ -778,7 +778,7 @@
     "wickets": 0,
     "economy": 0.0,
     "bowlingAverage": 0.0,
-    "image": "assets/images/players/placeholder.svg",
+    "image": "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRnkJW87THszchJpAEkvvK5lq7Ah3p1C5UCT8bepDhxOQ&s=10",
     "teamColor": "#FDB913"
   },
   {
@@ -801,7 +801,7 @@
     "wickets": 0,
     "economy": 0.0,
     "bowlingAverage": 0.0,
-    "image": "assets/images/players/placeholder.svg",
+    "image": "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRzR885Cbm34Xb7WjvHC7ODCNivNkjg36Qgoq-XpjEXb77SMvkUhrQkjyw&s=10",
     "teamColor": "#004BA0"
   },
   {
@@ -824,7 +824,7 @@
     "wickets": 38,
     "economy": 8.39,
     "bowlingAverage": 32.74,
-    "image": "assets/images/players/placeholder.svg",
+    "image": "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSP5tc85vDLA1V_DmX7YcUCqE4-EHj-sWLmpLZqR5MYsg&s=10",
     "teamColor": "#ED1B24"
   },
   {
@@ -847,7 +847,7 @@
     "wickets": 28,
     "economy": 9.38,
     "bowlingAverage": 30.43,
-    "image": "assets/images/players/placeholder.svg",
+    "image": "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcR-2b71J9fGGbXrmi7zO3JWhqzE4Yrzr0caIicSXNjKBTt2oKBxgsn5F4g&s=10",
     "teamColor": "#17479E"
   },
   {
@@ -870,7 +870,7 @@
     "wickets": 0,
     "economy": 0.0,
     "bowlingAverage": 0.0,
-    "image": "assets/images/players/placeholder.svg",
+    "image": "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcT7m54WjYB-pO5wYjyAjDRnAs_79GrhdzOB40LxKwYe9A&s=10",
     "teamColor": "#FDB913"
   },
   {
@@ -893,7 +893,7 @@
     "wickets": 0,
     "economy": 0.0,
     "bowlingAverage": 0.0,
-    "image": "assets/images/players/placeholder.svg",
+    "image": "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQQwUZhsVdaGTQFEYUNzZaarwF8pDtygenluhIKGFJs5A&s=10",
     "teamColor": "#254AA5"
   },
   {
@@ -916,7 +916,7 @@
     "wickets": 7,
     "economy": 8.27,
     "bowlingAverage": 20.29,
-    "image": "assets/images/players/placeholder.svg",
+    "image": "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcS7n_h9zdRtyziaWAk78JnVOqZ_m188Yg-lWwt9X3BhYg&s=10",
     "teamColor": "#3A225D"
   },
   {
